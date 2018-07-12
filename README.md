@@ -1,5 +1,5 @@
 # retrobomb
-[ ![Codeship Status for LegalShield/retrobomb](https://app.codeship.com/projects/e2669770-62cc-0136-4a2b-16beb3710b43/status?branch=master)](https://app.codeship.com/projects/296894)
+[ ![Codeship Status for LegalShield/retrobomb](https://app.codeship.com/projects/edfdc830-681d-0136-bff1-2264ee9649ab/status?branch=master)](https://app.codeship.com/projects/297794)
 
 Error mapping library for Retrofit and OkHttp. Provides an interceptor that allows you to continue working with existing call adapter factories.
 
