@@ -1,0 +1,77 @@
+def sharedGroupId = 'com.legalshield'
+def sharedVersion = '0.0.4'
+
+group sharedGroupId
+version sharedVersion
+
+buildscript {
+    ext {
+        /** build configuration */
+        kotlin_version = '1.2.51'
+        jvm_target = '1.8'
+
+        /** test dependencies */
+        junit_version = '4.12'
+        hamcrest_version = '1.3'
+        spectrum_version = '1.2.0'
+        kluent_version = '1.28'
+    }
+
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+subprojects {
+    apply {
+        plugin 'kotlin'
+        plugin 'maven-publish'
+    }
+
+    repositories {
+        jcenter()
+    }
+
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = "sources"
+        from sourceSets.main.allSource
+    }
+
+    publishing {
+        publications {
+            retrobomb(MavenPublication) {
+                groupId sharedGroupId
+                version sharedVersion
+                artifactId project.name
+
+                from components.java
+
+                artifact sourcesJar
+
+                pom {
+                    description = 'Simple error response mapping system for Retrofit and OkHttp.'
+                }
+            }
+        }
+
+        repositories {
+            mavenLocal()
+        }
+    }
+
+    dependencies {
+        compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    }
+
+    compileKotlin {
+        kotlinOptions.jvmTarget = jvm_target
+    }
+
+    compileTestKotlin {
+        kotlinOptions.jvmTarget = jvm_target
+    }
+}
