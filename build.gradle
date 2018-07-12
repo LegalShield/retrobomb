@@ -29,11 +29,21 @@ buildscript {
 subprojects {
     apply {
         plugin 'kotlin'
-        plugin 'maven-publish'
+        plugin 'signing'
+        plugin 'maven'
     }
 
     repositories {
         jcenter()
+    }
+
+    group = sharedGroupId
+    archivesBaseName = "retrobomb"
+    version = sharedVersion
+
+    task javadocJar(type: Jar) {
+        classifier = 'javadoc'
+        from javadoc
     }
 
     task sourcesJar(type: Jar, dependsOn: classes) {
@@ -41,25 +51,64 @@ subprojects {
         from sourceSets.main.allSource
     }
 
-    publishing {
-        publications {
-            retrobomb(MavenPublication) {
-                groupId sharedGroupId
-                version sharedVersion
-                artifactId project.name
+    artifacts {
+        archives sourcesJar, javadocJar
+    }
 
-                from components.java
+    signing {
+        sign configurations.archives
+    }
 
-                artifact sourcesJar
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                beforeDeployment {
+                    MavenDeployment deployment -> signing.signPom(deployment)
+                }
 
-                pom {
-                    description = 'Simple error response mapping system for Retrofit and OkHttp.'
+                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                    authentication(userName: ossrhUsername, password: ossrhPassword)
+                }
+
+                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                    authentication(userName: ossrhUsername, password: ossrhPassword)
+                }
+
+                pom.project {
+                    name project.name
+                    packaging 'jar'
+
+                    description project.description
+                    url 'https://github.com/LegalShield/retrobomb'
+
+                    scm {
+                        connection 'scm:git:https://github.com/LegalShield/retrobomb'
+                        developerConnection 'scm:git:https://github.com/LegalShield/retrobomb'
+                        url 'https://github.com/LegalShield/retrobomb'
+                    }
+
+                    licenses {
+                        license {
+                            name 'MIT'
+                            url 'https://github.com/LegalShield/retrobomb/blob/master/LICENSE'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id 'noheltcj'
+                            name 'Colton Nohelty'
+                            email 'noheltycolton@gmail.com'
+                        }
+
+                        developer {
+                            id 'jeremycrussell'
+                            name 'Jeremy Russell'
+                            email 'jeremyrussell@legalshieldcorp.com'
+                        }
+                    }
                 }
             }
-        }
-
-        repositories {
-            mavenLocal()
         }
     }
 
