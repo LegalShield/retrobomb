@@ -97,6 +97,16 @@ subprojects {
                                 url 'https://github.com/LegalShield/retrobomb/blob/master/LICENSE'
                             }
                         }
+
+                        developers {
+                            developer {
+                                developer {
+                                    id 'core'
+                                    name 'LegalShield'
+                                    email 'opensource@legalshieldcorp.com'
+                                }
+                            }
+                        }
                     }
                 }
             }
