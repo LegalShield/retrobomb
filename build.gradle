@@ -7,6 +7,7 @@ version sharedVersion
 buildscript {
     ext {
         /** build configuration */
+        upload_artifacts = System.getenv("uploadRetrobomb") == "true"
         kotlin_version = '1.2.51'
         jvm_target = '1.8'
 
@@ -52,7 +53,9 @@ subprojects {
     }
 
     signing {
-        sign configurations.archives
+        if (upload_artifacts) {
+            sign configurations.archives
+        }
     }
 
     artifacts {
@@ -60,37 +63,39 @@ subprojects {
     }
 
     uploadArchives {
-        repositories {
-            mavenDeployer {
-                beforeDeployment {
-                    MavenDeployment deployment -> signing.signPom(deployment)
-                }
-
-                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                    authentication(userName: ossrhUsername, password: ossrhPassword)
-                }
-
-                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                    authentication(userName: ossrhUsername, password: ossrhPassword)
-                }
-
-                pom.project {
-                    name project.name
-                    packaging 'jar'
-
-                    description project.description
-                    url 'https://github.com/LegalShield/retrobomb'
-
-                    scm {
-                        connection 'scm:git:https://github.com/LegalShield/retrobomb'
-                        developerConnection 'scm:git:https://github.com/LegalShield/retrobomb'
-                        url 'https://github.com/LegalShield/retrobomb'
+        if (upload_artifacts) {
+            repositories {
+                mavenDeployer {
+                    beforeDeployment {
+                        MavenDeployment deployment -> signing.signPom(deployment)
                     }
 
-                    licenses {
-                        license {
-                            name 'MIT'
-                            url 'https://github.com/LegalShield/retrobomb/blob/master/LICENSE'
+                    repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                        authentication(userName: ossrhUsername, password: ossrhPassword)
+                    }
+
+                    snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                        authentication(userName: ossrhUsername, password: ossrhPassword)
+                    }
+
+                    pom.project {
+                        name project.name
+                        packaging 'jar'
+
+                        description project.description
+                        url 'https://github.com/LegalShield/retrobomb'
+
+                        scm {
+                            connection 'scm:git:https://github.com/LegalShield/retrobomb'
+                            developerConnection 'scm:git:https://github.com/LegalShield/retrobomb'
+                            url 'https://github.com/LegalShield/retrobomb'
+                        }
+
+                        licenses {
+                            license {
+                                name 'MIT'
+                                url 'https://github.com/LegalShield/retrobomb/blob/master/LICENSE'
+                            }
                         }
                     }
                 }
