@@ -93,20 +93,6 @@ subprojects {
                             url 'https://github.com/LegalShield/retrobomb/blob/master/LICENSE'
                         }
                     }
-
-                    developers {
-                        developer {
-                            id 'noheltcj'
-                            name 'Colton Nohelty'
-                            email 'noheltycolton@gmail.com'
-                        }
-
-                        developer {
-                            id 'jeremycrussell'
-                            name 'Jeremy Russell'
-                            email 'jeremyrussell@legalshieldcorp.com'
-                        }
-                    }
                 }
             }
         }
