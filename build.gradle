@@ -51,12 +51,12 @@ subprojects {
         from sourceSets.main.allSource
     }
 
-    artifacts {
-        archives sourcesJar, javadocJar
-    }
-
     signing {
         sign configurations.archives
+    }
+
+    artifacts {
+        archives sourcesJar, javadocJar, jar
     }
 
     uploadArchives {
