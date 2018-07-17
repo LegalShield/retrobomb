@@ -7,6 +7,7 @@ version sharedVersion
 buildscript {
     ext {
         /** build configuration */
+        upload_artifacts = System.getenv("uploadRetrobomb") == "true"
         kotlin_version = '1.2.51'
         jvm_target = '1.8'
 
@@ -29,11 +30,21 @@ buildscript {
 subprojects {
     apply {
         plugin 'kotlin'
-        plugin 'maven-publish'
+        plugin 'signing'
+        plugin 'maven'
     }
 
     repositories {
         jcenter()
+    }
+
+    group = sharedGroupId
+    archivesBaseName = "retrobomb"
+    version = sharedVersion
+
+    task javadocJar(type: Jar) {
+        classifier = 'javadoc'
+        from javadoc
     }
 
     task sourcesJar(type: Jar, dependsOn: classes) {
@@ -41,25 +52,62 @@ subprojects {
         from sourceSets.main.allSource
     }
 
-    publishing {
-        publications {
-            retrobomb(MavenPublication) {
-                groupId sharedGroupId
-                version sharedVersion
-                artifactId project.name
+    signing {
+        if (upload_artifacts) {
+            sign configurations.archives
+        }
+    }
 
-                from components.java
+    artifacts {
+        archives sourcesJar, javadocJar, jar
+    }
 
-                artifact sourcesJar
+    uploadArchives {
+        if (upload_artifacts) {
+            repositories {
+                mavenDeployer {
+                    beforeDeployment {
+                        MavenDeployment deployment -> signing.signPom(deployment)
+                    }
 
-                pom {
-                    description = 'Simple error response mapping system for Retrofit and OkHttp.'
+                    repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                        authentication(userName: ossrhUsername, password: ossrhPassword)
+                    }
+
+                    snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                        authentication(userName: ossrhUsername, password: ossrhPassword)
+                    }
+
+                    pom.project {
+                        name project.name
+                        packaging 'jar'
+
+                        description 'Simple error response mapping system for Retrofit and OkHttp.'
+                        url 'https://github.com/LegalShield/retrobomb'
+
+                        scm {
+                            connection 'scm:git:https://github.com/LegalShield/retrobomb'
+                            developerConnection 'scm:git:https://github.com/LegalShield/retrobomb'
+                            url 'https://github.com/LegalShield/retrobomb'
+                        }
+
+                        licenses {
+                            license {
+                                name 'MIT'
+                                url 'https://github.com/LegalShield/retrobomb/blob/master/LICENSE'
+                            }
+                        }
+
+                        developers {
+                            developer {
+                                id 'core'
+                                name 'LegalShield'
+                                email 'opensource@legalshieldcorp.com'
+                            }
+                        }
+                    }
                 }
             }
-        }
-
-        repositories {
-            mavenLocal()
         }
     }
 
