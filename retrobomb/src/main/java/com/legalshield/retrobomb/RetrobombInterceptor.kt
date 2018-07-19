@@ -17,7 +17,7 @@ import java.net.HttpURLConnection.*
  * @param repositoryClass The retrofit repository interface
  * @param gson Optionally inject a custom gson configuration
  */
-class RetrobombInterceptor(repositoryClass: Class<*>, private val gson: Gson = Gson()) : Interceptor {
+class RetrobombInterceptor @JvmOverloads constructor(repositoryClass: Class<*>, private val gson: Gson = Gson()) : Interceptor {
     private val mapping = Retrobomb(repositoryClass).generateMapping()
 
     override fun intercept(chain: Interceptor.Chain?): Response {
