@@ -1,5 +1,5 @@
 def sharedGroupId = 'com.legalshield'
-def sharedVersion = '0.0.4'
+def sharedVersion = '0.0.5'
 
 group sharedGroupId
 version sharedVersion
@@ -9,7 +9,7 @@ buildscript {
         /** build configuration */
         upload_artifacts = System.getenv("uploadRetrobomb") == "true"
         kotlin_version = '1.2.51'
-        jvm_target = '1.8'
+        jvm_target = '1.6'
 
         /** test dependencies */
         junit_version = '4.12'
