@@ -10,6 +10,7 @@ import org.amshove.kluent.shouldContain
 
 import org.junit.runner.RunWith
 import retrofit2.http.*
+import java.util.*
 import kotlin.reflect.KClass
 
 @RunWith(Spectrum::class)
@@ -81,6 +82,19 @@ class RetrobombIntegration {
                     }
                 }
 
+                describe("when there are routes present with query parameters") {
+                    lateinit var retrobomb: Retrobomb<FakeQueryParamRepository>
+
+                    beforeEach {
+                        retrobomb = Retrobomb(FakeQueryParamRepository::class.java)
+                        results = retrobomb.generateMapping()
+                    }
+
+                    it("produces a map with query parameter regex as the key") {
+                        results.shouldContain(RouteStatusKey(Pattern.compile("${beginning}v1/widgets$terminal"), Retrobomb.HttpMethod.GET, 500) to FakeUnknownError::class)
+                    }
+                }
+
                 describe("generated regexes only match the intended routes") {
                     it("should match the intended route without host information") {
                         Pattern.compile("${beginning}something$terminal").matcher("something").matches().shouldBeTrue()
@@ -95,8 +109,8 @@ class RetrobombIntegration {
                             Pattern.compile("${beginning}v1/something$terminal").matcher("https://www.something.com/v1/something/").matches().shouldBeTrue()
                         }
 
-                        it("should match when there are query parameters") {
-                            Pattern.compile("${beginning}v1/something$terminal").matcher("https://www.something.com/v1/something?query=something").matches().shouldBeTrue()
+                        it("should not match when there are query parameters") {
+                            Pattern.compile("${beginning}v1/something$terminal").matcher("https://www.something.com/v1/something?query=something").matches().shouldBeFalse()
                         }
 
                         it("should not match a longer route") {
@@ -106,21 +120,67 @@ class RetrobombIntegration {
                     }
 
                     describe("route with path variable") {
+                        val singlePathVarPattern = Pattern.compile("${beginning}v1/widgets/$pathVar$terminal")
                         it("should match the intended route with substitutions") {
-                            Pattern.compile("${beginning}v1/widgets/$pathVar$terminal").matcher("https://www.something.com/v1/widgets/25").matches().shouldBeTrue()
+                            singlePathVarPattern
+                                .matcher("https://www.something.com/v1/widgets/25")
+                                .matches().shouldBeTrue()
                         }
 
-                        it("should match the intended route with query parameters") {
-                            Pattern.compile("${beginning}v1/widgets/$pathVar$terminal").matcher("https://www.something.com/v1/widgets/25?query=something").matches().shouldBeTrue()
+                        it("should not match the route when there are query parameters") {
+                            singlePathVarPattern
+                                .matcher("https://www.something.com/v1/widgets/25?query=something")
+                                .matches().shouldBeFalse()
                         }
 
                         it("should match the intended route ending with a /") {
-                            Pattern.compile("${beginning}v1/widgets/$pathVar$terminal").matcher("https://www.something.com/v1/widgets/25/").matches().shouldBeTrue()
+                            singlePathVarPattern
+                                .matcher("https://www.something.com/v1/widgets/25/")
+                                .matches().shouldBeTrue()
                         }
 
                         it("should not match a longer route") {
-                            Pattern.compile("${beginning}v1/widgets/$pathVar$terminal").matcher("https://www.something.com/v1/widgets/25/cogs").matches().shouldBeFalse()
-                            Pattern.compile("${beginning}v1/widgets/$pathVar$terminal").matcher("https://www.something.com/v1/widgets/25/cogs/2").matches().shouldBeFalse()
+                            singlePathVarPattern
+                                .matcher("https://www.something.com/v1/widgets/25/cogs")
+                                .matches().shouldBeFalse()
+                            singlePathVarPattern
+                                .matcher("https://www.something.com/v1/widgets/25/cogs/2")
+                                .matches().shouldBeFalse()
+                        }
+                    }
+
+                    describe("route with query parameter") {
+                        val singleParamPattern = Pattern.compile("${beginning}v1/widgets$terminal${beginQuery}widgetType=$queryParam")
+                        val doubleParamPattern = Pattern.compile("${beginning}v1/widgets$terminal${beginQuery}widgetType=$queryParam&widgetLength=$queryParam")
+
+                        it("should match the intended route with query param substitutions") {
+                            singleParamPattern
+                                .matcher("https://www.something.com/v1/widgets?widgetType=broken")
+                                .matches().shouldBeTrue()
+                        }
+
+                        it("should match the intended route ending with a / before the query") {
+                            singleParamPattern
+                                .matcher("https://www.something.com/v1/widgets/?widgetType=broken")
+                                .matches().shouldBeTrue()
+                        }
+
+                        it("should match a query parameter with an empty value") {
+                            singleParamPattern
+                                .matcher("https://www.something.com/v1/widgets?widgetType=")
+                                .matches().shouldBeTrue()
+                        }
+
+                        it("should not match a longer route") {
+                            singleParamPattern
+                                .matcher("https://www.something.com/v1/widgets?widgetType=fixed&widgetLength=short")
+                                .matches().shouldBeFalse()
+                        }
+
+                        it("should match multiple expected query parameters") {
+                            doubleParamPattern
+                                .matcher("https://www.something.com/v1/widgets?widgetType=fixed&widgetLength=short")
+                                .matches().shouldBeTrue()
                         }
                     }
                 }
@@ -167,12 +227,21 @@ class RetrobombIntegration {
         fun getCogById(@Path("widgetId") widgetId: String, @Path("cogId") cogId: Int)
     }
 
+    @Suppress("unused")
+    interface FakeQueryParamRepository {
+        @RetrobombMappings(ErrorMapping(500, FakeUnknownError::class))
+        @GET("v1/widgets")
+        fun getFilteredWidgets(@Query("widgetType") widgetTypeQueryParam: String, @Query("createdBefore") createdBefore: Date)
+    }
+
     data class FakeUnknownError(val message: String)
     data class FakeAuthError(val message: String)
 
     companion object {
-        const val beginning = ".*?"
-        const val terminal = "((\\?.*)|/)?"
-        const val pathVar = "[^/]+"
+        const val beginning = "^.*?"
+        const val terminal = "/?"
+        const val queryParam = "[^&]*"
+        const val pathVar = "[^/?]+"
+        const val beginQuery = "\\?"
     }
 }
