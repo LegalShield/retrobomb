@@ -90,8 +90,8 @@ class RetrobombIntegration {
                         results = retrobomb.generateMapping()
                     }
 
-                    it("produces a map with query parameter regex as the key") {
-                        results.shouldContain(RouteStatusKey(Pattern.compile("${beginning}v1/widgets$terminal"), Retrobomb.HttpMethod.GET, 500) to FakeUnknownError::class)
+                    it("produces a map with the appropriate regex as the key") {
+                        results.shouldContain(RouteStatusKey(Pattern.compile("${beginning}v1/widgets$terminal?widgetType=$queryParam&createdBefore=$queryParam"), Retrobomb.HttpMethod.GET, 500) to FakeUnknownError::class)
                     }
                 }
 
