@@ -19,6 +19,7 @@ class RetrobombIntegration {
         describe("Retrobomb integration tests") {
             describe("#generateMapping") {
                 lateinit var results: Map<RouteStatusKey, KClass<*>>
+
                 describe("when there are no routes to map") {
                     lateinit var retrobomb: Retrobomb<FakeEmptyRepository>
 
@@ -34,6 +35,7 @@ class RetrobombIntegration {
 
                 describe("when there are routes present without path variables") {
                     lateinit var retrobomb: Retrobomb<FakeRepository>
+                    val expectedPattern = Pattern.compile("${beginning}v1/something$terminal")
 
                     beforeEach {
                         retrobomb = Retrobomb(FakeRepository::class.java)
@@ -41,31 +43,31 @@ class RetrobombIntegration {
                     }
 
                     it("produces a map with a key for GET") {
-                        results.shouldContain(RouteStatusKey(Pattern.compile("${beginning}v1/something$terminal"), Retrobomb.HttpMethod.GET, 500) to FakeUnknownError::class)
+                        results.shouldContain(RouteStatusKey(expectedPattern, Retrobomb.HttpMethod.GET, 500) to FakeUnknownError::class)
                     }
 
                     it("produces a map with a key for POST") {
-                        results.shouldContain(RouteStatusKey(Pattern.compile("${beginning}v1/something$terminal"), Retrobomb.HttpMethod.POST, 401) to FakeAuthError::class)
+                        results.shouldContain(RouteStatusKey(expectedPattern, Retrobomb.HttpMethod.POST, 401) to FakeAuthError::class)
                     }
 
                     it("produces a map with a key for PATCH") {
-                        results.shouldContain(RouteStatusKey(Pattern.compile("${beginning}v1/something$terminal"), Retrobomb.HttpMethod.PATCH, 500) to FakeUnknownError::class)
+                        results.shouldContain(RouteStatusKey(expectedPattern, Retrobomb.HttpMethod.PATCH, 500) to FakeUnknownError::class)
                     }
 
                     it("produces a map with a key for PUT") {
-                        results.shouldContain(RouteStatusKey(Pattern.compile("${beginning}v1/something$terminal"), Retrobomb.HttpMethod.PUT, 401) to FakeAuthError::class)
+                        results.shouldContain(RouteStatusKey(expectedPattern, Retrobomb.HttpMethod.PUT, 401) to FakeAuthError::class)
                     }
 
                     it("produces a map with a key for DELETE") {
-                        results.shouldContain(RouteStatusKey(Pattern.compile("${beginning}v1/something$terminal"), Retrobomb.HttpMethod.DELETE, 500) to FakeUnknownError::class)
+                        results.shouldContain(RouteStatusKey(expectedPattern, Retrobomb.HttpMethod.DELETE, 500) to FakeUnknownError::class)
                     }
 
                     it("produces a map with a key for HEAD") {
-                        results.shouldContain(RouteStatusKey(Pattern.compile("${beginning}v1/something$terminal"), Retrobomb.HttpMethod.HEAD, 401) to FakeAuthError::class)
+                        results.shouldContain(RouteStatusKey(expectedPattern, Retrobomb.HttpMethod.HEAD, 401) to FakeAuthError::class)
                     }
 
                     it("produces a map with a key for OPTIONS") {
-                        results.shouldContain(RouteStatusKey(Pattern.compile("${beginning}v1/something$terminal"), Retrobomb.HttpMethod.OPTIONS, 500) to FakeUnknownError::class)
+                        results.shouldContain(RouteStatusKey(expectedPattern, Retrobomb.HttpMethod.OPTIONS, 500) to FakeUnknownError::class)
                     }
                 }
 
@@ -77,8 +79,12 @@ class RetrobombIntegration {
                         results = retrobomb.generateMapping()
                     }
 
-                    it("produces a map with a path regex in the key") {
-                        results.shouldContain(RouteStatusKey(Pattern.compile("${beginning}v1/widgets/$pathVar/cogs/$pathVar$terminal"), Retrobomb.HttpMethod.GET, 500) to FakeUnknownError::class)
+                    it("produces a map with the appropriate regex in the key") {
+                        results.shouldContain(RouteStatusKey(
+                            Pattern.compile("${beginning}v1/widgets/$pathVar/cogs/$pathVar$terminal"),
+                            Retrobomb.HttpMethod.GET,
+                            500
+                        ) to FakeUnknownError::class)
                     }
                 }
 
@@ -91,60 +97,68 @@ class RetrobombIntegration {
                     }
 
                     it("produces a map with the appropriate regex as the key") {
-                        results.shouldContain(RouteStatusKey(Pattern.compile("${beginning}v1/widgets$terminal?widgetType=$queryParam&createdBefore=$queryParam"), Retrobomb.HttpMethod.GET, 500) to FakeUnknownError::class)
+                        results.shouldContain(RouteStatusKey(
+                            Pattern.compile("${beginning}v1/widgets$terminal${beginQuery}widgetType=$queryParam&createdBefore=$queryParam"),
+                            Retrobomb.HttpMethod.GET,
+                            500
+                        ) to FakeUnknownError::class)
                     }
                 }
 
                 describe("generated regexes only match the intended routes") {
                     it("should match the intended route without host information") {
-                        Pattern.compile("${beginning}something$terminal").matcher("something").matches().shouldBeTrue()
+                        Pattern.compile("${beginning}something$terminal")
+                            .matcher("something")
+                            .matches().shouldBeTrue()
                     }
 
                     describe("route with no parameters") {
+                        val plainRoutePattern = Pattern.compile("${beginning}v1/something$terminal")
+
                         it("should match the intended route") {
-                            Pattern.compile("${beginning}v1/something$terminal").matcher("https://www.something.com/v1/something").matches().shouldBeTrue()
+                            plainRoutePattern.matcher("https://www.something.com/v1/something")
+                                .matches().shouldBeTrue()
                         }
 
                         it("should match the intended route ending with a /") {
-                            Pattern.compile("${beginning}v1/something$terminal").matcher("https://www.something.com/v1/something/").matches().shouldBeTrue()
+                            plainRoutePattern.matcher("https://www.something.com/v1/something/")
+                                .matches().shouldBeTrue()
                         }
 
                         it("should not match when there are query parameters") {
-                            Pattern.compile("${beginning}v1/something$terminal").matcher("https://www.something.com/v1/something?query=something").matches().shouldBeFalse()
+                            plainRoutePattern.matcher("https://www.something.com/v1/something?query=something")
+                                .matches().shouldBeFalse()
                         }
 
                         it("should not match a longer route") {
-                            Pattern.compile("${beginning}v1/something$terminal").matcher("https://www.something.com/v1/something/hello").matches().shouldBeFalse()
-                            Pattern.compile("${beginning}v1/something$terminal").matcher("https://www.something.com/v1/something/25/hellos").matches().shouldBeFalse()
+                            plainRoutePattern.matcher("https://www.something.com/v1/something/hello")
+                                .matches().shouldBeFalse()
+                            plainRoutePattern.matcher("https://www.something.com/v1/something/25/hellos")
+                                .matches().shouldBeFalse()
                         }
                     }
 
                     describe("route with path variable") {
                         val singlePathVarPattern = Pattern.compile("${beginning}v1/widgets/$pathVar$terminal")
                         it("should match the intended route with substitutions") {
-                            singlePathVarPattern
-                                .matcher("https://www.something.com/v1/widgets/25")
+                            singlePathVarPattern.matcher("https://www.something.com/v1/widgets/25")
                                 .matches().shouldBeTrue()
                         }
 
                         it("should not match the route when there are query parameters") {
-                            singlePathVarPattern
-                                .matcher("https://www.something.com/v1/widgets/25?query=something")
+                            singlePathVarPattern.matcher("https://www.something.com/v1/widgets/25?query=something")
                                 .matches().shouldBeFalse()
                         }
 
                         it("should match the intended route ending with a /") {
-                            singlePathVarPattern
-                                .matcher("https://www.something.com/v1/widgets/25/")
+                            singlePathVarPattern.matcher("https://www.something.com/v1/widgets/25/")
                                 .matches().shouldBeTrue()
                         }
 
                         it("should not match a longer route") {
-                            singlePathVarPattern
-                                .matcher("https://www.something.com/v1/widgets/25/cogs")
+                            singlePathVarPattern.matcher("https://www.something.com/v1/widgets/25/cogs")
                                 .matches().shouldBeFalse()
-                            singlePathVarPattern
-                                .matcher("https://www.something.com/v1/widgets/25/cogs/2")
+                            singlePathVarPattern.matcher("https://www.something.com/v1/widgets/25/cogs/2")
                                 .matches().shouldBeFalse()
                         }
                     }
@@ -154,20 +168,17 @@ class RetrobombIntegration {
                         val doubleParamPattern = Pattern.compile("${beginning}v1/widgets$terminal${beginQuery}widgetType=$queryParam&widgetLength=$queryParam")
 
                         it("should match the intended route with query param substitutions") {
-                            singleParamPattern
-                                .matcher("https://www.something.com/v1/widgets?widgetType=broken")
+                            singleParamPattern.matcher("https://www.something.com/v1/widgets?widgetType=broken")
                                 .matches().shouldBeTrue()
                         }
 
                         it("should match the intended route ending with a / before the query") {
-                            singleParamPattern
-                                .matcher("https://www.something.com/v1/widgets/?widgetType=broken")
+                            singleParamPattern.matcher("https://www.something.com/v1/widgets/?widgetType=broken")
                                 .matches().shouldBeTrue()
                         }
 
                         it("should match a query parameter with an empty value") {
-                            singleParamPattern
-                                .matcher("https://www.something.com/v1/widgets?widgetType=")
+                            singleParamPattern.matcher("https://www.something.com/v1/widgets?widgetType=")
                                 .matches().shouldBeTrue()
                         }
 

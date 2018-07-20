@@ -2,7 +2,6 @@ package com.legalshield.retrobomb
 
 import retrofit2.http.*
 import com.google.re2j.Pattern
-import java.lang.reflect.Method
 import kotlin.reflect.KClass
 
 class Retrobomb<Repository>(private val repositoryType: Class<Repository>) {
@@ -35,7 +34,7 @@ class Retrobomb<Repository>(private val repositoryType: Class<Repository>) {
         return mappings
     }
 
-    private fun createPrimaryFromRetrofit(path: String): String {
+    private fun createPathFromRetrofit(path: String): String {
         val bodyPattern = pathVariablePattern.matcher(path).replaceAll("""[^/?]+""")
         return """^.*?$bodyPattern/?"""
     }
@@ -44,13 +43,14 @@ class Retrobomb<Repository>(private val repositoryType: Class<Repository>) {
         return queryParamNames
             .takeIf { it.isNotEmpty() }?.joinToString(
                 separator = "=$queryParameterPatternString&",
-                prefix = "?",
+                prefix = "\\?",
                 postfix = "=$queryParameterPatternString") ?: ""
     }
 
     private fun mergeIntoMappings(queryParamNames: List<String>, rawPath: String, httpMethod: HttpMethod, errorClassMappings: Array<out ErrorMapping>) {
         errorClassMappings.map {
-            mappings[RouteStatusKey(Pattern.compile("${createPrimaryFromRetrofit(rawPath)}${createQueryFromRetrofit(queryParamNames)}"), httpMethod, it.code)] = it.errorType
+            val pattern = Pattern.compile("${createPathFromRetrofit(rawPath)}${createQueryFromRetrofit(queryParamNames)}")
+            mappings[RouteStatusKey(pattern, httpMethod, it.code)] = it.errorType
         }
     }
 
@@ -59,7 +59,8 @@ class Retrobomb<Repository>(private val repositoryType: Class<Repository>) {
     }
 
     companion object {
+        private const val queryParameterPatternString = "[^&]*"
+
         private val pathVariablePattern = Pattern.compile("""\{.+?}""")
-        private val queryParameterPatternString = """[^&]*"""
     }
 }
