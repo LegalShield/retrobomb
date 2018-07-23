@@ -105,16 +105,40 @@ class RetrobombIntegration {
                     }
                 }
 
-                describe("generated regexes only match the intended routes") {
-                    it("should match the intended route without host information") {
-                        Pattern.compile("${beginning}something$terminal")
-                            .matcher("something")
-                            .matches().shouldBeTrue()
+                describe("when there are routes present with path and query parameters") {
+                    lateinit var retrobomb: Retrobomb<FakeComplexRepository>
+
+                    beforeEach {
+                        retrobomb = Retrobomb(FakeComplexRepository::class.java)
+                        results = retrobomb.generateMapping()
                     }
 
-                    describe("route with no parameters") {
-                        val plainRoutePattern = Pattern.compile("${beginning}v1/something$terminal")
+                    it("produces a map with the appropriate regex as the key") {
+                        results.shouldContain(RouteStatusKey(
+                            Pattern.compile("${beginning}v1/widgets/$pathVar/cogs/$pathVar$terminal" +
+                                    "${beginQuery}widgetType=$queryParam&createdBefore=$queryParam"),
+                            Retrobomb.HttpMethod.GET,
+                            500
+                        ) to FakeUnknownError::class)
+                    }
 
+                    describe("generated regex url matching") {
+                        lateinit var generatedRoute: Pattern
+
+                        beforeEach {
+                            generatedRoute = results.keys.first().route
+                        }
+
+                        it("should match the intended route without host information") {
+                            generatedRoute.matcher("something").matches().shouldBeTrue()
+                        }
+                    }
+                }
+
+                describe("generated regexes only match the intended routes") {
+                    val plainRoutePattern = Pattern.compile("${beginning}v1/something$terminal")
+
+                    describe("route with no parameters") {
                         it("should match the intended route") {
                             plainRoutePattern.matcher("https://www.something.com/v1/something")
                                 .matches().shouldBeTrue()
@@ -242,6 +266,13 @@ class RetrobombIntegration {
     interface FakeQueryParamRepository {
         @RetrobombMappings(ErrorMapping(500, FakeUnknownError::class))
         @GET("v1/widgets")
+        fun getFilteredWidgets(@Query("widgetType") widgetTypeQueryParam: String, @Query("createdBefore") createdBefore: Date)
+    }
+
+    @Suppress("unused")
+    interface FakeComplexRepository {
+        @RetrobombMappings(ErrorMapping(500, FakeUnknownError::class))
+        @GET("v1/widgets/{widgetId}/cogs/{cogId}")
         fun getFilteredWidgets(@Query("widgetType") widgetTypeQueryParam: String, @Query("createdBefore") createdBefore: Date)
     }
 
