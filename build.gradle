@@ -1,5 +1,5 @@
 def sharedGroupId = 'com.legalshield'
-def sharedVersion = '0.0.5'
+def sharedVersion = '0.1.0'
 
 group sharedGroupId
 version sharedVersion
