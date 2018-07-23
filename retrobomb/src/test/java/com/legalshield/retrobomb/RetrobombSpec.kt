@@ -11,9 +11,9 @@ import java.util.*
 import kotlin.reflect.KClass
 
 @RunWith(Spectrum::class)
-class RetrobombIntegration {
+class RetrobombSpec {
     init {
-        describe("Retrobomb integration tests") {
+        describe("Retrobomb Spec") {
             describe("#generateMapping") {
                 lateinit var results: Map<RouteStatusKey, KClass<*>>
 
