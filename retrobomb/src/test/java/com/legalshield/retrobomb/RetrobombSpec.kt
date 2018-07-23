@@ -181,7 +181,7 @@ class RetrobombSpec {
                     val expectedSingleParamKey = RouteStatusKey(
                         Pattern.compile("${beginning}v1/widgets$terminal${beginQuery}widgetType=$queryParam"),
                         Retrobomb.HttpMethod.GET,
-                        401
+                        500
                     )
 
                     val expectedDoubleParamKey = RouteStatusKey(
@@ -404,7 +404,7 @@ class RetrobombSpec {
 
     @Suppress("unused")
     interface FakeQueryParamRepository {
-        @RetrobombMappings(ErrorMapping(401, FakeAuthError::class))
+        @RetrobombMappings(ErrorMapping(500, FakeAuthError::class))
         @GET("v1/widgets")
         fun getFilteredWidgets(@Query("widgetType") widgetTypeQueryParam: String)
 
