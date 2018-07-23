@@ -1,5 +1,5 @@
 # retrobomb
-[ ![Codeship Status for LegalShield/retrobomb](https://app.codeship.com/projects/edfdc830-681d-0136-bff1-2264ee9649ab/status?branch=master)](https://app.codeship.com/projects/297794) [![Maven Central][https://maven-badges.herokuapp.com/maven-central/com.legalshield/retrobomb/badge.svg]]
+[ ![Codeship Status for LegalShield/retrobomb](https://app.codeship.com/projects/edfdc830-681d-0136-bff1-2264ee9649ab/status?branch=master)](https://app.codeship.com/projects/297794) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.legalshield/retrobomb/badge.svg)]
 Error mapping library for Retrofit and OkHttp. Provides an interceptor that allows you to continue working with existing call adapter factories.
 
 ## Setup
