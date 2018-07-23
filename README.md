@@ -74,3 +74,18 @@ For Kotlin when you have multiple expected error types:
     /* reaching this point means you have a RetrobombMappingException or IOException due to connectivity etc. */
   }
 ```
+
+## Installation
+### Maven
+```
+<dependency>
+  <groupId>com.legalshield</groupId>
+  <artifactId>retrobomb</artifactId>
+  <version>0.0.5</version>
+</dependency>
+```
+
+### Gradle
+```
+compile 'com.legalshield:retrobomb:0.0.5'
+```
