@@ -1,5 +1,6 @@
 # retrobomb
 [ ![Codeship Status for LegalShield/retrobomb](https://app.codeship.com/projects/edfdc830-681d-0136-bff1-2264ee9649ab/status?branch=master)](https://app.codeship.com/projects/297794)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.legalshield/retrobomb/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.legalshield/retrobomb)
 
 Error mapping library for Retrofit and OkHttp. Provides an interceptor that allows you to continue working with existing call adapter factories.
 
@@ -81,11 +82,11 @@ For Kotlin when you have multiple expected error types:
 <dependency>
   <groupId>com.legalshield</groupId>
   <artifactId>retrobomb</artifactId>
-  <version>0.0.5</version>
+  <version>0.1.0</version>
 </dependency>
 ```
 
 ### Gradle
 ```
-compile 'com.legalshield:retrobomb:0.0.5'
+compile 'com.legalshield:retrobomb:0.1.0'
 ```
