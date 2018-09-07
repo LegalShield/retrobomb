@@ -63,7 +63,7 @@ For Kotlin when you have only one expected error type:
 For Kotlin when you have multiple expected error types:
 ```kotlin
 /* Make call for observable */
-  .subscribe({ responseData ->
+  .subscribe({ data ->
     /* success stuff */
   }, { throwable ->
     if (throwable.unwrapRetrobombException {
