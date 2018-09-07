@@ -35,11 +35,11 @@ class RetrobombInterceptor @JvmOverloads constructor(repositoryClass: Class<*>, 
                             it.code == code && it.method.name == request.method() && it.route.matcher(url).matches()
                         }
                         .let { mapping[it]?.java }
-                        .takeIf { it != String::class.java } ?: throw RetrobombException(responseBody)
+                        .takeIf { it != String::class.java } ?: throw RetrobombException(url, code, responseBody)
 
                     lateinit var mappedException: RetrobombException
                     try {
-                        mappedException = RetrobombException(gson.fromJson(responseBody, convertClass))
+                        mappedException = RetrobombException(url, code, gson.fromJson(responseBody, convertClass))
                     } catch (e: JsonSyntaxException) {
                         throw RetrobombMappingException("Unable to convert JSON to expected type", e)
                     } catch (e: IllegalStateException) {

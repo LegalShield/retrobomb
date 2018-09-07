@@ -2,6 +2,7 @@ package com.legalshield.retrobomb
 
 import com.greghaskins.spectrum.Spectrum
 import com.greghaskins.spectrum.Spectrum.*
+import com.legalshield.retrobomb.entity.ResponseData
 import com.legalshield.retrobomb.extensions.handleRetrobombErrorData
 import com.legalshield.retrobomb.extensions.unwrapRetrobombException
 import org.amshove.kluent.shouldBeFalse
@@ -35,15 +36,15 @@ class ThrowableExtensionSpec {
                         lateinit var fakeData: FakeData
                         beforeEach {
                             fakeData = FakeData("")
-                            throwable = RetrobombException(fakeData)
+                            throwable = RetrobombException("someUrl", 2, fakeData)
                         }
 
                         it("should invoke the handler with the correct data") {
-                            lateinit var handlerData: FakeData
+                            lateinit var handlerData: ResponseData<FakeData>
 
                             throwable.handleRetrobombErrorData<FakeData> { handlerData = it }
 
-                            handlerData shouldEqual fakeData
+                            handlerData shouldEqual ResponseData("someUrl", 2, fakeData)
                         }
 
                         it("should return true") {
@@ -55,7 +56,7 @@ class ThrowableExtensionSpec {
                         lateinit var fakeData: String
                         beforeEach {
                             fakeData = ""
-                            throwable = RetrobombException(fakeData)
+                            throwable = RetrobombException("", 1, fakeData)
                         }
 
                         it("should not invoke the handler") {
@@ -88,7 +89,7 @@ class ThrowableExtensionSpec {
                     lateinit var retrobombException: RetrobombException
 
                     beforeEach {
-                        retrobombException = RetrobombException("")
+                        retrobombException = RetrobombException(url = "url", code = 3, data = "string data")
                         throwable = retrobombException
                     }
 
@@ -97,7 +98,7 @@ class ThrowableExtensionSpec {
 
                         throwable.unwrapRetrobombException { unwrapResult = it }
 
-                        unwrapResult shouldEqual retrobombException.data
+                        unwrapResult shouldEqual ResponseData<Any>(url = "url", code = 3, data = "string data")
                     }
 
                     it("should return true") {

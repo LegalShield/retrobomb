@@ -1,3 +1,3 @@
 package com.legalshield.retrobomb
 
-class RetrobombException(val data: Any): RuntimeException()
+class RetrobombException(val url: String, val code: Int, val data: Any): RuntimeException()
