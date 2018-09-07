@@ -1,6 +1,7 @@
 package com.legalshield.retrobomb;
 
 import com.greghaskins.spectrum.Spectrum;
+import com.legalshield.retrobomb.entity.ResponseData;
 import com.legalshield.retrobomb.interop.RetrobombHandler;
 import com.legalshield.retrobomb.utility.MutableLocalReference;
 import org.junit.runner.RunWith;
@@ -30,14 +31,14 @@ public class RetrobombHandlerSpec {
                 describe("when the throwable is a RetrobombException", () -> {
                     describe("when the data type matches", () -> {
                         final FakeData fakeData = new FakeData();
-                        final Throwable throwable = new RetrobombException(fakeData);
+                        final Throwable throwable = new RetrobombException("url", 1, fakeData);
 
                         it("should invoke the handler with the correct data", () -> {
-                            MutableLocalReference<FakeData> handledData = new MutableLocalReference<>();
+                            MutableLocalReference<ResponseData<FakeData>> handledData = new MutableLocalReference<>();
 
                             RetrobombHandler.handleErrorData(throwable, FakeData.class, handledData::set);
 
-                            assertEquals(handledData.get(), fakeData);
+                            assertEquals(handledData.get(), new ResponseData<>("url", 1, fakeData));
                         });
 
                         it("should return true", () ->
@@ -47,7 +48,7 @@ public class RetrobombHandlerSpec {
 
                     describe("when the data type does not match", () -> {
                         final String fakeData = "";
-                        final Throwable throwable = new RetrobombException(fakeData);
+                        final Throwable throwable = new RetrobombException("url", 1,fakeData);
 
                         it("should not invoke the handler", () ->
                             RetrobombHandler.handleErrorData(throwable, FakeData.class, data -> fail())

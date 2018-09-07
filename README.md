@@ -53,7 +53,7 @@ For Kotlin when you have only one expected error type:
   .subscribe({ data ->
     /* success stuff */
   }, { throwable ->
-    if (throwable.handleRetrobombErrorData<String> { data ->
+    if (throwable.handleRetrobombErrorData<String> { responseData ->
       /* Handle string data */
     }) return
     /* reaching this point means you have a RetrobombMappingException or IOException due to connectivity etc. */
@@ -67,7 +67,7 @@ For Kotlin when you have multiple expected error types:
     /* success stuff */
   }, { throwable ->
     if (throwable.unwrapRetrobombException {
-      when(it) {
+      when(it.data) {
         is ValidationError -> /* handle validation error */
         is String -> /* handle generic error */
       }
@@ -82,11 +82,11 @@ For Kotlin when you have multiple expected error types:
 <dependency>
   <groupId>com.legalshield</groupId>
   <artifactId>retrobomb</artifactId>
-  <version>0.1.0</version>
+  <version>0.2.0</version>
 </dependency>
 ```
 
 ### Gradle
 ```
-compile 'com.legalshield:retrobomb:0.1.0'
+compile 'com.legalshield:retrobomb:0.2.0'
 ```
