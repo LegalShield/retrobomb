@@ -11,7 +11,7 @@ inline fun <reified ErrorData> Throwable.handleRetrobombErrorData(
     crossinline handler: (data: ResponseData<ErrorData>) -> Unit
 ): Boolean {
   return if (this is RetrobombException && data is ErrorData) {
-    handler(ResponseData(url, code, data))
+    handler(ResponseData(url = url, code = code, data = data))
     true
   } else {
     false
@@ -23,7 +23,7 @@ inline fun <reified ErrorData> Throwable.handleRetrobombErrorData(
  */
 inline fun Throwable.unwrapRetrobombException(crossinline handler: (data: ResponseData<Any>) -> Unit): Boolean {
     return if (this is RetrobombException) {
-      handler(ResponseData(url, code, data))
+      handler(ResponseData(url = url, code = code, data = data))
       true
     } else {
       false

@@ -10,7 +10,7 @@ import com.legalshield.retrobomb.entity.ResponseData
  */
 fun <ErrorData> Throwable.handleErrorData(type: Class<ErrorData>, handler: Handler<ResponseData<ErrorData>>) =
     if (this is RetrobombException && data.javaClass == type) {
-      handler.handle(ResponseData(url, code, type.cast(data)))
+      handler.handle(ResponseData(url = url, code = code, data = type.cast(data)))
       true
     } else {
       false

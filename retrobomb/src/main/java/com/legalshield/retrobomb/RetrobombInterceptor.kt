@@ -25,7 +25,13 @@ class RetrobombInterceptor @JvmOverloads constructor(repositoryClass: Class<*>, 
         return chain.proceed(request).apply {
             val code = code()
             when (code) {
-                HTTP_ACCEPTED, HTTP_OK, HTTP_CREATED, HTTP_NOT_AUTHORITATIVE, HTTP_RESET, HTTP_NO_CONTENT, HTTP_PARTIAL -> {}
+                HTTP_ACCEPTED,
+                HTTP_OK,
+                HTTP_CREATED,
+                HTTP_NOT_AUTHORITATIVE,
+                HTTP_RESET,
+                HTTP_NO_CONTENT,
+                HTTP_PARTIAL -> {}
                 else -> {
                     val responseBody = body()?.string() ?: return@apply
                     val url = request.url().encodedPath()
@@ -35,11 +41,16 @@ class RetrobombInterceptor @JvmOverloads constructor(repositoryClass: Class<*>, 
                             it.code == code && it.method.name == request.method() && it.route.matcher(url).matches()
                         }
                         .let { mapping[it]?.java }
-                        .takeIf { it != String::class.java } ?: throw RetrobombException(url, code, responseBody)
+                        .takeIf { it != String::class.java } ?:
+                            throw RetrobombException(url = url, code = code, data = responseBody)
 
                     lateinit var mappedException: RetrobombException
                     try {
-                        mappedException = RetrobombException(url, code, gson.fromJson(responseBody, convertClass))
+                        mappedException = RetrobombException(
+                            url = url,
+                            code = code,
+                            data = gson.fromJson(responseBody, convertClass)
+                        )
                     } catch (e: JsonSyntaxException) {
                         throw RetrobombMappingException("Unable to convert JSON to expected type", e)
                     } catch (e: IllegalStateException) {

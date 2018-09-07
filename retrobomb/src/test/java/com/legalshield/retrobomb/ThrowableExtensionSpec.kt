@@ -36,7 +36,7 @@ class ThrowableExtensionSpec {
                         lateinit var fakeData: FakeData
                         beforeEach {
                             fakeData = FakeData("")
-                            throwable = RetrobombException("someUrl", 2, fakeData)
+                            throwable = RetrobombException(url = "someUrl", code = 2, data = fakeData)
                         }
 
                         it("should invoke the handler with the correct data") {
@@ -44,7 +44,7 @@ class ThrowableExtensionSpec {
 
                             throwable.handleRetrobombErrorData<FakeData> { handlerData = it }
 
-                            handlerData shouldEqual ResponseData("someUrl", 2, fakeData)
+                            handlerData shouldEqual ResponseData(url = "someUrl", code = 2, data = fakeData)
                         }
 
                         it("should return true") {
@@ -56,7 +56,7 @@ class ThrowableExtensionSpec {
                         lateinit var fakeData: String
                         beforeEach {
                             fakeData = ""
-                            throwable = RetrobombException("", 1, fakeData)
+                            throwable = RetrobombException(url = "", code = 1, data = fakeData)
                         }
 
                         it("should not invoke the handler") {
