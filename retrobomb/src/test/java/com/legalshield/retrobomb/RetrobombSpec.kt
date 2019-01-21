@@ -366,56 +366,56 @@ class RetrobombSpec {
     interface FakeEmptyRepository
     @Suppress("unused")
     interface FakeRepository {
-        @RetrobombMappings(ErrorMapping(500, FakeUnknownError::class))
+        @RetrobombMappings(ErrorMapping(FakeUnknownError::class, 500))
         @GET("v1/something")
         fun getSomething()
 
-        @RetrobombMappings(ErrorMapping(401, FakeAuthError::class))
+        @RetrobombMappings(ErrorMapping(FakeAuthError::class, 401))
         @POST("v1/something")
         fun postSomething()
 
-        @RetrobombMappings(ErrorMapping(500, FakeUnknownError::class))
+        @RetrobombMappings(ErrorMapping(FakeUnknownError::class, 500))
         @PATCH("v1/something")
         fun patchSomething()
 
-        @RetrobombMappings(ErrorMapping(401, FakeAuthError::class))
+        @RetrobombMappings(ErrorMapping(FakeAuthError::class, 401))
         @PUT("v1/something")
         fun putSomething()
 
-        @RetrobombMappings(ErrorMapping(500, FakeUnknownError::class))
+        @RetrobombMappings(ErrorMapping(FakeUnknownError::class, 500))
         @DELETE("v1/something")
         fun deleteSomething()
 
-        @RetrobombMappings(ErrorMapping(401, FakeAuthError::class))
+        @RetrobombMappings(ErrorMapping(FakeAuthError::class, 401))
         @HEAD("v1/something")
         fun headSomething()
 
-        @RetrobombMappings(ErrorMapping(500, FakeUnknownError::class))
+        @RetrobombMappings(ErrorMapping(FakeUnknownError::class, 500))
         @OPTIONS("v1/something")
         fun optionsSomething()
     }
 
     @Suppress("unused")
     interface FakePathVariableRepository {
-        @RetrobombMappings(ErrorMapping(500, FakeUnknownError::class))
+        @RetrobombMappings(ErrorMapping(FakeUnknownError::class, 500))
         @GET("v1/widgets/{widgetId}/cogs/{cogId}")
         fun getCogById(@Path("widgetId") widgetId: String, @Path("cogId") cogId: Int)
     }
 
     @Suppress("unused")
     interface FakeQueryParamRepository {
-        @RetrobombMappings(ErrorMapping(500, FakeAuthError::class))
+        @RetrobombMappings(ErrorMapping(FakeAuthError::class, 500))
         @GET("v1/widgets")
         fun getFilteredWidgets(@Query("widgetType") widgetTypeQueryParam: String)
 
-        @RetrobombMappings(ErrorMapping(500, FakeUnknownError::class))
+        @RetrobombMappings(ErrorMapping(FakeUnknownError::class, 500))
         @GET("v1/widgets")
         fun getFilteredWidgets(@Query("widgetType") widgetTypeQueryParam: String, @Query("createdBefore") createdBefore: Date)
     }
 
     @Suppress("unused")
     interface FakeComplexRepository {
-        @RetrobombMappings(ErrorMapping(500, FakeUnknownError::class))
+        @RetrobombMappings(ErrorMapping(FakeUnknownError::class, 500))
         @GET("v1/widgets/{widgetId}/cogs/{cogId}")
         fun getFilteredWidgets(@Query("widgetType") widgetTypeQueryParam: String, @Query("createdBefore") createdBefore: Date)
     }
